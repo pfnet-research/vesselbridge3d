@@ -16,8 +16,8 @@ dependencies = [
 ]
 
 [project.scripts]
-vesselbridge3d-train = "vesselbridge3d.train:main"
-vesselbridge3d-infer = "vesselbridge3d.inference:main"
+vb3d-train = "vesselbridge3d.train:main"
+vb3d-infer = "vesselbridge3d.inference:main"
 
 [build-system]
 requires = ["setuptools>=61"]
