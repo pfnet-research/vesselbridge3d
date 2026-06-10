@@ -45,6 +45,37 @@ The commands below run these scripts via `uv run` within the managed environment
 
 The architecture is selected with `--model_type` (default `dinov3_unetr`). New models are added under `vesselbridge3d/models/` and registered in the model registry; the same training and inference commands then work for any registered `--model_type`.
 
+#### Comparison models (MedSAM / MedGemma)
+
+To benchmark the DINOv3 encoder against other medical foundation encoders, two
+additional `--model_type` values swap **only** the frozen 2D encoder while keeping
+the entire downstream stack (3D ConvNeXt adapter, shared FFA aggregator, UNETR-Lite
+decoder, refine heads) identical. This isolates encoder quality as the only variable.
+
+| `--model_type` | Frozen encoder | hidden dim | patch | preset config |
+|---|---|---|---|---|
+| `dinov3_unetr` | DINOv3 ViT-S/16 (`facebook/dinov3-vits16-pretrain-lvd1689m`) | 384 | 16 | `configs/train_3d_default.yaml` |
+| `medsam_unetr` | MedSAM SAM ViT-B (`wanglab/medsam-vit-base`) | 768 | 16 | `configs/train_3d_medsam.yaml` |
+| `medgemma_unetr` | MedGemma SigLIP vision tower (`google/medgemma-4b-it`) | 1152 | 14 | `configs/train_3d_medgemma.yaml` |
+
+Each encoder's per-layer outputs are projected with a 1×1 conv to a common working
+dimension (384) before the aggregator, so trainable capacity and memory stay
+comparable across models (for DINOv3 the projection is an identity).
+
+For a controlled comparison, train all three with the same `--train_list` /
+`--val_list` and the same schedule, then evaluate on the same in-distribution and
+OOD `--test_list`:
+
+```bash
+uv run vb3d-train --config configs/train_3d_medsam.yaml   --train_list train.json --val_list val.json --save_dir runs/medsam
+uv run vb3d-train --config configs/train_3d_medgemma.yaml --train_list train.json --val_list val.json --save_dir runs/medgemma
+```
+
+> **Caveats**
+> - **Gated weights**: MedGemma requires accepting its license on the Hugging Face Hub and authenticating (`huggingface-cli login` or `export HF_TOKEN=...`). MedGemma loads the 4B VLM and keeps only its SigLIP vision tower.
+> - **Input size**: the default 336×336 is shared by all models for a fair comparison. It is a multiple of both patch sizes (336 = 16×21 = 14×24). Running off each encoder's native resolution (MedSAM 1024, MedSigLIP 448) means the absolute position embeddings are interpolated — MedSigLIP can optionally be run at its native `--img_size 448`.
+> - **Patch size differs** (DINOv3/MedSAM = 16, SigLIP = 14): `--img_size` must be a multiple of the selected encoder's patch size, which is validated at runtime.
+
 > **Layout**
 > The package root contains only the two runnable entry points, `train.py` and `inference.py`. All library code lives in subpackages: `models/` (architectures + registry), `data/` (datasets, preprocessing), `engine/` (training loop, inference, losses), and `common/` (config, constants, utilities).
 
