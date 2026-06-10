@@ -15,13 +15,17 @@ import torch.nn as nn
 MODEL_REGISTRY: Dict[str, Callable[..., nn.Module]] = {}
 
 
-def register_model(name: str) -> Callable[[Callable[..., nn.Module]], Callable[..., nn.Module]]:
+def register_model(
+    name: str,
+) -> Callable[[Callable[..., nn.Module]], Callable[..., nn.Module]]:
     """Decorator registering a model builder under ``name``."""
+
     def deco(fn: Callable[..., nn.Module]) -> Callable[..., nn.Module]:
         if name in MODEL_REGISTRY:
             raise ValueError(f"Model {name!r} is already registered")
         MODEL_REGISTRY[name] = fn
         return fn
+
     return deco
 
 

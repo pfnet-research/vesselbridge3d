@@ -17,13 +17,22 @@ class SegDecoder3D_UNETRLite(nn.Module):
     - Creates 3 upsampling blocks for up_factor_hw=8.
     - (Reuse the last skip if there are too few; discard the first ones if there are too many.)
     """
-    def __init__(self, c_in: int, c_skip: int, num_classes: int,
-                 up_factor_hw: int = 4, base_channels: int = 128, use_se: bool = True):
+
+    def __init__(
+        self,
+        c_in: int,
+        c_skip: int,
+        num_classes: int,
+        up_factor_hw: int = 4,
+        base_channels: int = 128,
+        use_se: bool = True,
+    ):
         super().__init__()
         steps = []
         f = up_factor_hw
         while f > 1:
-            steps.append(2); f //= 2
+            steps.append(2)
+            f //= 2
         self.num_stages = max(1, len(steps))
 
         self.stem = nn.Sequential(
@@ -34,11 +43,15 @@ class SegDecoder3D_UNETRLite(nn.Module):
 
         blocks = []
         for _ in range(self.num_stages):
-            blocks.append(UpBlock3DSkip(base_channels, c_skip, base_channels, use_se=use_se))
+            blocks.append(
+                UpBlock3DSkip(base_channels, c_skip, base_channels, use_se=use_se)
+            )
         self.blocks = nn.ModuleList(blocks)
 
         self.refine = nn.Sequential(
-            nn.Conv3d(base_channels, base_channels, kernel_size=(1,3,3), padding=(0,1,1)),
+            nn.Conv3d(
+                base_channels, base_channels, kernel_size=(1, 3, 3), padding=(0, 1, 1)
+            ),
             nn.GroupNorm(8, base_channels),
             nn.SiLU(inplace=False),
         )
@@ -48,7 +61,7 @@ class SegDecoder3D_UNETRLite(nn.Module):
         h = self.stem(bottom)
         skips = list(skip_list)
         if len(skips) >= self.num_stages:
-            skips = skips[-self.num_stages:]  # from deepest
+            skips = skips[-self.num_stages :]  # from deepest
         else:
             # when there are too few skip connections, repeat the last one
             while len(skips) < self.num_stages:

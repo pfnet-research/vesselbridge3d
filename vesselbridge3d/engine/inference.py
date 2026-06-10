@@ -26,7 +26,7 @@ def save_nifti(data, affine, header, out_path):
 
 
 def run_inference(args):
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
 
     H_target, W_target = parse_img_size(args.img_size)
@@ -36,30 +36,32 @@ def run_inference(args):
     vit_layers = parse_layers(args.vit_layers)
 
     model = build_model(
-        getattr(args, 'model_type', 'dinov3_unetr'),
+        getattr(args, "model_type", "dinov3_unetr"),
         num_classes=args.num_classes,
         vit_layers=vit_layers,
         decoder_base_channels=DEFAULT_DECODER_BASE_CHANNELS,
         decoder_up_factor=args.decoder_up_factor,
         vit_chunk_slices=args.vit_chunk_slices,
         vit_amp=args.vit_amp,
-        use_se=True
+        use_se=True,
     ).to(device)
 
     load_model_weights(model, args.checkpoint, device)
     model.eval()
 
-    with open(args.test_list, 'r') as f:
+    with open(args.test_list, "r") as f:
         test_data = json.load(f)
 
     os.makedirs(args.out_dir, exist_ok=True)
 
-    crop_d = int(getattr(args, 'crop_depth', CROP_D))
+    crop_d = int(getattr(args, "crop_depth", CROP_D))
 
     with torch.no_grad():
         for case in tqdm(test_data):
-            vol_path = case.get('volume') or case.get('image')
-            case_id = os.path.basename(vol_path).replace(".nii.gz", "").replace(".nii", "")
+            vol_path = case.get("volume") or case.get("image")
+            case_id = (
+                os.path.basename(vol_path).replace(".nii.gz", "").replace(".nii", "")
+            )
 
             img = nib.load(vol_path)
             vol_data = img.get_fdata(dtype=np.float32)
@@ -86,30 +88,32 @@ def run_inference(args):
                 # Padding
                 if current_depth < crop_d:
                     pad_d = crop_d - current_depth
-                    chunk = F.pad(chunk, (0,0, 0,0, 0,0, 0,pad_d))
+                    chunk = F.pad(chunk, (0, 0, 0, 0, 0, 0, 0, pad_d))
 
-                with torch.amp.autocast('cuda', enabled=args.vit_amp):
+                with torch.amp.autocast("cuda", enabled=args.vit_amp):
                     logits = model(chunk)
 
                 if current_depth < crop_d:
                     logits = logits[:, :, :current_depth, :, :]
 
-                logits_cpu = logits.cpu().float() # [1, K, current_depth, 336, 336]
+                logits_cpu = logits.cpu().float()  # [1, K, current_depth, 336, 336]
 
                 for i in range(current_depth):
-                    slice_logits = logits_cpu[:, :, i, :, :] # (1, K, 336, 336)
+                    slice_logits = logits_cpu[:, :, i, :, :]  # (1, K, 336, 336)
 
                     # Argmax
-                    slice_pred_336 = torch.argmax(slice_logits, dim=1).unsqueeze(1).float()
+                    slice_pred_336 = (
+                        torch.argmax(slice_logits, dim=1).unsqueeze(1).float()
+                    )
 
                     # Resize to original HW (Nearest Neighbor)
                     slice_resized = F.interpolate(
-                        slice_pred_336,
-                        size=(H_orig, W_orig),
-                        mode='nearest'
+                        slice_pred_336, size=(H_orig, W_orig), mode="nearest"
                     )
 
-                    final_pred_mask[z_start + i, :, :] = slice_resized.squeeze().numpy().astype(np.uint8)
+                    final_pred_mask[z_start + i, :, :] = (
+                        slice_resized.squeeze().numpy().astype(np.uint8)
+                    )
 
             pred_save = np.transpose(final_pred_mask, (1, 2, 0))
             out_name = f"{case_id}.nii.gz"

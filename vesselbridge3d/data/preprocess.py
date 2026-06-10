@@ -13,8 +13,8 @@ def parse_img_size(s: str) -> Tuple[int, int]:
     """
     '224' -> (224 ,224), '512' -> (512, 512)
     """
-    s = str(s).strip().lower().replace('x', ',')
-    parts = [p for p in s.split(',') if p]
+    s = str(s).strip().lower().replace("x", ",")
+    parts = [p for p in s.split(",") if p]
     if len(parts) == 1:
         h = w = int(parts[0])
     elif len(parts) == 2:
@@ -26,7 +26,7 @@ def parse_img_size(s: str) -> Tuple[int, int]:
 
 def parse_layers(s: str) -> Tuple[int, ...]:
     """'2,5,8,11' -> (2, 5, 8, 11)."""
-    return tuple(int(t) for t in str(s).replace(' ', '').split(',') if t != '')
+    return tuple(int(t) for t in str(s).replace(" ", "").split(",") if t != "")
 
 
 def preprocess_with_z(data_numpy, target_h, target_w):
@@ -44,7 +44,9 @@ def preprocess_with_z(data_numpy, target_h, target_w):
     img_tensor = torch.from_numpy(data_numpy).float().permute(2, 0, 1).unsqueeze(1)
 
     # [D, 1, Ht, Wt]
-    img_resized = F.interpolate(img_tensor, size=(target_h, target_w), mode='bilinear', align_corners=False)
+    img_resized = F.interpolate(
+        img_tensor, size=(target_h, target_w), mode="bilinear", align_corners=False
+    )
 
     # [D, 1, Ht, Wt]
     z_channel = z_tensor.expand(D_orig, 1, target_h, target_w)

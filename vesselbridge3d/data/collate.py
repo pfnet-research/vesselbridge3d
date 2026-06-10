@@ -32,15 +32,15 @@ def make_collate_pad_3d(depth_min_fg_frac: float | None = None):
 
         B, Dmax, _, H, W = X.shape
         for b in range(B):
-            valid_depths = M[b, :, 0, 0]         # [Dmax] True/False
-            d = int(valid_depths.sum().item())   # valid depth num
+            valid_depths = M[b, :, 0, 0]  # [Dmax] True/False
+            d = int(valid_depths.sum().item())  # valid depth num
             if d == 0:
                 continue
 
-            yb = Y[b, :d]                        # [d,H,W]
+            yb = Y[b, :d]  # [d,H,W]
             fg_counts = (yb > 0).float().view(d, -1).sum(dim=1)  # [d]
-            frac = fg_counts / float(H * W)                       # [d]
-            good = (frac >= thr)                                  # [d] bool
+            frac = fg_counts / float(H * W)  # [d]
+            good = frac >= thr  # [d] bool
 
             M[b, :d] &= good.view(d, 1, 1).expand(d, H, W)
 

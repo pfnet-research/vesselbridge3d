@@ -48,7 +48,10 @@ def compute_class_histogram(ds, num_classes: int) -> np.ndarray:
 
     return counts
 
-def make_class_weights(num_classes: int, counts: np.ndarray, bg_weight: float, use_mfb: bool) -> torch.Tensor:
+
+def make_class_weights(
+    num_classes: int, counts: np.ndarray, bg_weight: float, use_mfb: bool
+) -> torch.Tensor:
     if use_mfb:
         freq = counts.astype(np.float64)
         freq = np.maximum(freq, 1.0)
@@ -70,7 +73,9 @@ def init_prior_bias_for_head(head: nn.Module, num_classes: int, counts: np.ndarr
                 cls_conv = m
                 break
     if cls_conv is None:
-        raise RuntimeError(f"Could not find classifier Conv(out_channels={num_classes}) in head.")
+        raise RuntimeError(
+            f"Could not find classifier Conv(out_channels={num_classes}) in head."
+        )
 
     probs = counts.astype(np.float64)
     probs = np.maximum(probs, 1.0)
@@ -79,10 +84,17 @@ def init_prior_bias_for_head(head: nn.Module, num_classes: int, counts: np.ndarr
 
     with torch.no_grad():
         if cls_conv.bias is None:
-            cls_conv.bias = nn.Parameter(torch.zeros(cls_conv.out_channels,
-                                                     device=cls_conv.weight.device,
-                                                     dtype=cls_conv.weight.dtype))
-        cls_conv.bias.copy_(torch.from_numpy(bias).to(cls_conv.weight.device,
-                                                      dtype=cls_conv.weight.dtype))
+            cls_conv.bias = nn.Parameter(
+                torch.zeros(
+                    cls_conv.out_channels,
+                    device=cls_conv.weight.device,
+                    dtype=cls_conv.weight.dtype,
+                )
+            )
+        cls_conv.bias.copy_(
+            torch.from_numpy(bias).to(
+                cls_conv.weight.device, dtype=cls_conv.weight.dtype
+            )
+        )
 
     return cls_conv
