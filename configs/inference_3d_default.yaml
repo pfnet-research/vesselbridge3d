@@ -4,6 +4,7 @@
 #        --test_list ... --checkpoint ... --out_dir ...
 # Precedence: explicit CLI args > this config > argparse defaults.
 
+model_type: dinov3_unetr  # model architecture key (see vesselbridge3d.models registry)
 num_classes: 16
 img_size: "336"          # keep quoted: parse_img_size expects a string
 vit_layers: "2,5,8,11"   # keep quoted: comma-separated string
