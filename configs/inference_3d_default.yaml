@@ -1,0 +1,17 @@
+# Preset config for inference.py (3D model).
+# Keys must match inference.py argparse option names (dests).
+# Run: uv run python inference.py --config configs/inference_3d_default.yaml \
+#        --test_list ... --checkpoint ... --out_dir ...
+# Precedence: explicit CLI args > this config > argparse defaults.
+
+num_classes: 16
+img_size: "336"          # keep quoted: parse_img_size expects a string
+vit_layers: "2,5,8,11"   # keep quoted: comma-separated string
+decoder_up_factor: 4
+vit_chunk_slices: 8
+vit_amp: true
+
+# Per-run paths (usually passed on the CLI)
+# test_list: /path/to/test.json
+# checkpoint: /path/to/checkpoint.pt
+# out_dir: /path/to/output
