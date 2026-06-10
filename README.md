@@ -19,9 +19,22 @@ Our proposed architecture efficiently leverages robust 2D foundation models for 
 ## How to Run
 
 ### 1. Install Dependencies
+
+This project uses [uv](https://docs.astral.sh/uv/) for dependency management.
+
 ```bash
-pip install -r requirements.txt
+# Install uv (if not already installed)
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Create the virtual environment and install dependencies from uv.lock
+uv sync
 ```
+
+> **Note**
+> - Python 3.12 is used (managed automatically by uv via `.python-version`).
+> - PyTorch is installed with CUDA 12.1 builds (`torch==2.5.1+cu121`). The CUDA index is configured in `pyproject.toml`.
+
+Prefix the commands below with `uv run` (e.g. `uv run python train.py ...`), or activate the environment first with `source .venv/bin/activate`.
 
 ### 2. Prepare Data (JSON List Format)
 

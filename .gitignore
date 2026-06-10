@@ -1,0 +1,6 @@
+# uv / virtual environment
+.venv/
+
+# Python
+__pycache__/
+*.py[cod]
