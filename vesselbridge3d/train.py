@@ -63,6 +63,8 @@ import math
 
 from datetime import datetime
 
+from .config_utils import add_config_arg, parse_args_with_config
+
 IMAGENET_MEAN = torch.tensor([0.485, 0.456, 0.406], dtype=torch.float32).view(1,3,1,1)
 IMAGENET_STD  = torch.tensor([0.229, 0.224, 0.225], dtype=torch.float32).view(1,3,1,1)
 
@@ -76,7 +78,7 @@ def parse_img_size(s: str) -> Tuple[int, int]:
     """
     '224' -> (224 ,224), '512' -> (512, 512)
     """
-    s = s.strip().lower().replace('x', ',')
+    s = str(s).strip().lower().replace('x', ',')
     parts = [p for p in s.split(',') if p]
     if len(parts) == 1:
         h = w = int(parts[0])
@@ -1719,6 +1721,7 @@ def train(train_list: str,
 
 if __name__ == '__main__':
     ap = argparse.ArgumentParser()
+    add_config_arg(ap)
     # train/val lists
     ap.add_argument('--train_list', type=str, default=None, help='Path to training JSON list')
     ap.add_argument('--val_list',   type=str, default=None, help='Path to validation JSON list (defaults to train_list)')
@@ -1778,7 +1781,7 @@ if __name__ == '__main__':
                     default='/path/to/save_dir',
                     help='Directory to save best_checkpoint.pt and final_checkpoint.pt')
 
-    args = ap.parse_args()
+    args = parse_args_with_config(ap)
 
     # Resolve list paths (favor new args; fallback to legacy)
     if args.train_list is None:

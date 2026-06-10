@@ -16,7 +16,8 @@ import numpy as np
 import nibabel as nib
 from tqdm import tqdm
 
-from train import SegModel3D_UNETRLite, parse_img_size
+from .train import SegModel3D_UNETRLite, parse_img_size
+from .config_utils import add_config_arg, parse_args_with_config
 
 
 def preprocess_with_z(data_numpy, target_h, target_w):
@@ -156,6 +157,7 @@ def run_inference(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
+    add_config_arg(parser)
     parser.add_argument('--test_list', type=str, required=True)
     parser.add_argument('--checkpoint', type=str, required=True)
     parser.add_argument('--out_dir', type=str, required=True)
@@ -168,5 +170,5 @@ if __name__ == "__main__":
     parser.add_argument('--vit_chunk_slices', type=int, default=8)
     parser.add_argument('--vit_amp', action='store_true')
 
-    args = parser.parse_args()
+    args = parse_args_with_config(parser)
     run_inference(args)
