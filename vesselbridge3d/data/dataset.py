@@ -13,7 +13,7 @@ import torch
 import torch.nn.functional as F
 from torch.utils.data import Dataset
 
-from ..utils import _rbool, _runif
+from ..common.utils import _rbool, _runif
 
 
 # 3D Volume Dataset (full volume; in-plane aug shared across slices)

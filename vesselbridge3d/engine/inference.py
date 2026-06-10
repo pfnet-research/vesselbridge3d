@@ -11,10 +11,10 @@ import torch
 import torch.nn.functional as F
 from tqdm import tqdm
 
-from ..constants import CROP_D, DEFAULT_DECODER_BASE_CHANNELS
+from ..common.constants import CROP_D, DEFAULT_DECODER_BASE_CHANNELS
+from ..common.utils import get_logger
 from ..data import parse_img_size, parse_layers, preprocess_with_z
 from ..models import build_model
-from ..utils import get_logger
 from .checkpoint import load_model_weights
 
 logger = get_logger()

@@ -5,7 +5,7 @@ from __future__ import annotations
 import torch
 import torch.nn as nn
 
-from ..utils import get_logger
+from ..common.utils import get_logger
 
 logger = get_logger()
 

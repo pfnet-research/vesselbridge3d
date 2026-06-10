@@ -45,6 +45,9 @@ vesselbridge3d-infer ...   # equivalent to: python -m vesselbridge3d.inference .
 
 The architecture is selected with `--model_type` (default `dinov3_unetr`). New models are added under `vesselbridge3d/models/` and registered in the model registry; the same training and inference commands then work for any registered `--model_type`.
 
+> **Layout**
+> The package root contains only the two runnable entry points, `train.py` and `inference.py`. All library code lives in subpackages: `models/` (architectures + registry), `data/` (datasets, preprocessing), `engine/` (training loop, inference, losses), and `common/` (config, constants, utilities).
+
 ### 2. Prepare Data (JSON List Format)
 
 Training and validation data are specified via JSON files.  

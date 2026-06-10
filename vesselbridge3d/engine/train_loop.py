@@ -15,11 +15,12 @@ import torch.nn.functional as F
 from torch.optim import AdamW
 from torch.utils.data import DataLoader
 
-from ..constants import (
+from ..common.constants import (
     DEFAULT_DECODER_BASE_CHANNELS,
     DEFAULT_DECODER_UP_FACTOR,
     DEFAULT_MODEL_TYPE,
 )
+from ..common.utils import colorize, get_logger, make_palette, set_seed
 from ..data import (
     VolumeDataset3D,
     compute_class_histogram,
@@ -27,9 +28,8 @@ from ..data import (
     make_class_weights,
     make_collate_pad_3d,
 )
-from ..losses import DC_and_CE_loss
 from ..models import build_model
-from ..utils import colorize, get_logger, make_palette, set_seed
+from .losses import DC_and_CE_loss
 
 logger = get_logger()
 
