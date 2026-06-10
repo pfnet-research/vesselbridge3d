@@ -1,6 +1,6 @@
 # Preset config for train.py (3D model).
 # Keys must match train.py argparse option names (dests).
-# Run: uv run python train.py --config configs/train_3d_default.yaml --train_list ... --save_dir ...
+# Run: uv run python -m vesselbridge3d.train --config configs/train_3d_default.yaml --train_list ... --save_dir ...
 # Precedence: explicit CLI args > this config > argparse defaults.
 
 num_classes: 16

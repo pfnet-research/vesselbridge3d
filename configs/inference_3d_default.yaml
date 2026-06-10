@@ -1,6 +1,6 @@
 # Preset config for inference.py (3D model).
 # Keys must match inference.py argparse option names (dests).
-# Run: uv run python inference.py --config configs/inference_3d_default.yaml \
+# Run: uv run python -m vesselbridge3d.inference --config configs/inference_3d_default.yaml \
 #        --test_list ... --checkpoint ... --out_dir ...
 # Precedence: explicit CLI args > this config > argparse defaults.
 

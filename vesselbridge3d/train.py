@@ -63,7 +63,7 @@ import math
 
 from datetime import datetime
 
-from config_utils import add_config_arg, parse_args_with_config
+from .config_utils import add_config_arg, parse_args_with_config
 
 IMAGENET_MEAN = torch.tensor([0.485, 0.456, 0.406], dtype=torch.float32).view(1,3,1,1)
 IMAGENET_STD  = torch.tensor([0.229, 0.224, 0.225], dtype=torch.float32).view(1,3,1,1)

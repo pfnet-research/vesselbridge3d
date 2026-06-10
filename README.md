@@ -34,7 +34,7 @@ uv sync
 > - Python 3.12 is used (managed automatically by uv via `.python-version`).
 > - PyTorch is installed with CUDA 12.1 builds (`torch==2.5.1+cu121`). The CUDA index is configured in `pyproject.toml`.
 
-The commands below use `uv run` to execute scripts within the managed environment. Alternatively, activate the environment once with `source .venv/bin/activate` and run `python train.py ...` directly.
+The commands below use `uv run` to execute the package modules within the managed environment. Alternatively, activate the environment once with `source .venv/bin/activate` and run `python -m vesselbridge3d.train ...` directly. Run all commands from the repository root.
 
 ### 2. Prepare Data (JSON List Format)
 
@@ -61,7 +61,7 @@ Each entry must contain `"volume"` (image) and `"seg"` (label) paths.
 
 #### 3D Model 
 ```bash
-uv run python train.py \
+uv run python -m vesselbridge3d.train \
   --train_list /path/to/train.json \
   --val_list /path/to/val.json \
   --log_dir /path/to/log_dir \
@@ -82,6 +82,14 @@ uv run python train.py \
   --use_3d_unetr \
   --depth_min_fg_frac 0.0005
 ```
+
+Alternatively, load preset values from a YAML config (CLI args override the config):
+```bash
+uv run python -m vesselbridge3d.train \
+  --config configs/train_3d_default.yaml \
+  --train_list /path/to/train.json \
+  --save_dir /path/to/save_dir
+```
 ### 4. Inference
 
 Predictions are produced via a sliding window over the Z axis (chunk size = 64 slices).  
@@ -89,12 +97,21 @@ Each chunk is processed independently, and results are stitched back to the orig
 Output segmentation masks are saved as NIfTI files in `--out_dir`, preserving the original affine and header.
 
 ```bash
-uv run python inference.py \
+uv run python -m vesselbridge3d.inference \
   --test_list  /path/to/test.json \
   --checkpoint /path/to/checkpoint.pt \
   --out_dir    /path/to/output \
   --num_classes 16 \
   --img_size 336
+```
+
+Or with a preset config:
+```bash
+uv run python -m vesselbridge3d.inference \
+  --config configs/inference_3d_default.yaml \
+  --test_list /path/to/test.json \
+  --checkpoint /path/to/checkpoint.pt \
+  --out_dir /path/to/output
 ```
 
 > **Note**  

@@ -16,8 +16,8 @@ import numpy as np
 import nibabel as nib
 from tqdm import tqdm
 
-from train import SegModel3D_UNETRLite, parse_img_size
-from config_utils import add_config_arg, parse_args_with_config
+from .train import SegModel3D_UNETRLite, parse_img_size
+from .config_utils import add_config_arg, parse_args_with_config
 
 
 def preprocess_with_z(data_numpy, target_h, target_w):
