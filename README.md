@@ -34,7 +34,50 @@ uv sync
 > - Python 3.12 is used (managed automatically by uv via `.python-version`).
 > - PyTorch is installed with CUDA 12.1 builds (`torch==2.5.1+cu121`). The CUDA index is configured in `pyproject.toml`.
 
-The commands below use `uv run` to execute the package modules within the managed environment. Alternatively, activate the environment once with `source .venv/bin/activate` and run `python -m vesselbridge3d.train ...` directly. Run all commands from the repository root.
+After `uv sync` (or `uv pip install -e .`), two console scripts are installed and used as the primary commands throughout this README:
+
+```bash
+vb3d-train ...   # equivalent to: python -m vesselbridge3d.train ...
+vb3d-infer ...   # equivalent to: python -m vesselbridge3d.inference ...
+```
+
+The commands below run these scripts via `uv run` within the managed environment. Alternatively, activate the environment once with `source .venv/bin/activate` and then call `vb3d-train ...` / `vb3d-infer ...` directly (or `python -m vesselbridge3d.train ...`). Run all commands from the repository root.
+
+The architecture is selected with `--model_type` (default `dinov3_unetr`). New models are added under `vesselbridge3d/models/` and registered in the model registry; the same training and inference commands then work for any registered `--model_type`.
+
+#### Comparison models (MedSAM / MedGemma)
+
+To benchmark the DINOv3 encoder against other medical foundation encoders, two
+additional `--model_type` values swap **only** the frozen 2D encoder while keeping
+the entire downstream stack (3D ConvNeXt adapter, shared FFA aggregator, UNETR-Lite
+decoder, refine heads) identical. This isolates encoder quality as the only variable.
+
+| `--model_type` | Frozen encoder | hidden dim | patch | preset config |
+|---|---|---|---|---|
+| `dinov3_unetr` | DINOv3 ViT-S/16 (`facebook/dinov3-vits16-pretrain-lvd1689m`) | 384 | 16 | `configs/train_3d_default.yaml` |
+| `medsam_unetr` | MedSAM SAM ViT-B (`wanglab/medsam-vit-base`) | 768 | 16 | `configs/train_3d_medsam.yaml` |
+| `medgemma_unetr` | MedGemma SigLIP vision tower (`google/medgemma-4b-it`) | 1152 | 14 | `configs/train_3d_medgemma.yaml` |
+
+Each encoder's per-layer outputs are projected with a 1×1 conv to a common working
+dimension (384) before the aggregator, so trainable capacity and memory stay
+comparable across models (for DINOv3 the projection is an identity).
+
+For a controlled comparison, train all three with the same `--train_list` /
+`--val_list` and the same schedule, then evaluate on the same in-distribution and
+OOD `--test_list`:
+
+```bash
+uv run vb3d-train --config configs/train_3d_medsam.yaml   --train_list train.json --val_list val.json --save_dir runs/medsam
+uv run vb3d-train --config configs/train_3d_medgemma.yaml --train_list train.json --val_list val.json --save_dir runs/medgemma
+```
+
+> **Caveats**
+> - **Gated weights**: MedGemma requires accepting its license on the Hugging Face Hub and authenticating (`huggingface-cli login` or `export HF_TOKEN=...`). MedGemma loads the 4B VLM and keeps only its SigLIP vision tower.
+> - **Input size**: the default 336×336 is shared by all models for a fair comparison. It is a multiple of both patch sizes (336 = 16×21 = 14×24). Running off each encoder's native resolution (MedSAM 1024, MedSigLIP 448) means the absolute position embeddings are interpolated — MedSigLIP can optionally be run at its native `--img_size 448`.
+> - **Patch size differs** (DINOv3/MedSAM = 16, SigLIP = 14): `--img_size` must be a multiple of the selected encoder's patch size, which is validated at runtime.
+
+> **Layout**
+> The package root contains only the two runnable entry points, `train.py` and `inference.py`. All library code lives in subpackages: `models/` (architectures + registry), `data/` (datasets, preprocessing), `engine/` (training loop, inference, losses), and `common/` (config, constants, utilities).
 
 ### 2. Prepare Data (JSON List Format)
 
@@ -61,7 +104,7 @@ Each entry must contain `"volume"` (image) and `"seg"` (label) paths.
 
 #### 3D Model 
 ```bash
-uv run python -m vesselbridge3d.train \
+uv run vb3d-train \
   --train_list /path/to/train.json \
   --val_list /path/to/val.json \
   --log_dir /path/to/log_dir \
@@ -85,7 +128,7 @@ uv run python -m vesselbridge3d.train \
 
 Alternatively, load preset values from a YAML config (CLI args override the config):
 ```bash
-uv run python -m vesselbridge3d.train \
+uv run vb3d-train \
   --config configs/train_3d_default.yaml \
   --train_list /path/to/train.json \
   --save_dir /path/to/save_dir
@@ -97,7 +140,7 @@ Each chunk is processed independently, and results are stitched back to the orig
 Output segmentation masks are saved as NIfTI files in `--out_dir`, preserving the original affine and header.
 
 ```bash
-uv run python -m vesselbridge3d.inference \
+uv run vb3d-infer \
   --test_list  /path/to/test.json \
   --checkpoint /path/to/checkpoint.pt \
   --out_dir    /path/to/output \
@@ -107,7 +150,7 @@ uv run python -m vesselbridge3d.inference \
 
 Or with a preset config:
 ```bash
-uv run python -m vesselbridge3d.inference \
+uv run vb3d-infer \
   --config configs/inference_3d_default.yaml \
   --test_list /path/to/test.json \
   --checkpoint /path/to/checkpoint.pt \
@@ -122,6 +165,7 @@ uv run python -m vesselbridge3d.inference \
 
 | Argument | Default | Description |
 |---|---|---|
+| `--model_type` | `dinov3_unetr` | Model architecture key (see `vesselbridge3d.models` registry) |
 | `--train_list` | *(required)* | Path to the training JSON list |
 | `--val_list` | same as `train_list` | Path to the validation JSON list |
 | `--num_classes` | *(required)* | Number of classes including background |

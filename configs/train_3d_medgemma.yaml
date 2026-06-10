@@ -1,0 +1,48 @@
+# Preset config for train.py (MedGemma comparison model).
+# Identical to train_3d_default.yaml except for the encoder selection, so the
+# comparison against dinov3_unetr is controlled (same data / schedule / losses).
+# MedGemma is gated on the HF Hub: accept the license and export HF_TOKEN first.
+# Run: uv run vb3d-train --config configs/train_3d_medgemma.yaml --train_list ... --save_dir ...
+
+model_type: medgemma_unetr  # frozen MedGemma SigLIP vision tower + shared 3D head
+num_classes: 16
+epochs: 1000
+batch_size: 16
+accumulation_steps: 1
+lr: 5.0e-3
+min_lr: 1.0e-4
+seed: 42
+bg_weight: 0.05
+min_fg_frac: 0.0
+warmup_epochs: 0
+
+img_size: "336"          # multiple of SigLIP patch size (14); 336 = 14 * 24
+
+# 3D model
+use_3d: true
+depth_min_fg_frac: 0.0005
+crop_depth: 64
+vit_layers: "6,13,20,26"  # SigLIP-So400m has 27 blocks; spread the taps across depth
+decoder_up_factor: 4
+vit_chunk_slices: 4       # 27-layer / hidden-1152 ViT is heavier; smaller chunk for memory
+vit_amp: true
+
+# Augmentation
+aug: true
+aug_rotate: 15.0
+aug_scale_min: 0.90
+aug_scale_max: 1.10
+aug_translate: 0.10
+aug_hflip_p: 0.0
+aug_vflip_p: 0.0
+aug_noise_p: 0.2
+aug_noise_std: 0.01
+aug_bc_p: 0.3
+aug_brightness: 0.10
+aug_contrast: 0.10
+
+# Paths (override per run on the CLI, or set here)
+# train_list: /path/to/train.json
+# val_list: /path/to/val.json
+# save_dir: /path/to/save_dir
+# log_dir: /path/to/log_dir

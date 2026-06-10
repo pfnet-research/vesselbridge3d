@@ -1,9 +1,9 @@
-# Preset config for train.py (3D model).
-# Keys must match train.py argparse option names (dests).
-# Run: uv run python -m vesselbridge3d.train --config configs/train_3d_default.yaml --train_list ... --save_dir ...
-# Precedence: explicit CLI args > this config > argparse defaults.
+# Preset config for train.py (MedSAM comparison model).
+# Identical to train_3d_default.yaml except for the encoder selection, so the
+# comparison against dinov3_unetr is controlled (same data / schedule / losses).
+# Run: uv run vb3d-train --config configs/train_3d_medsam.yaml --train_list ... --save_dir ...
 
-model_type: dinov3_unetr  # model architecture key (see vesselbridge3d.models registry)
+model_type: medsam_unetr   # frozen MedSAM SAM-ViT-B encoder + shared 3D head
 num_classes: 16
 epochs: 1000
 batch_size: 16
@@ -15,13 +15,13 @@ bg_weight: 0.05
 min_fg_frac: 0.0
 warmup_epochs: 0
 
-img_size: "336"          # keep quoted: parse_img_size expects a string
+img_size: "336"          # multiple of SAM patch size (16); pos-embed is interpolated
 
 # 3D model
 use_3d: true
 depth_min_fg_frac: 0.0005
 crop_depth: 64
-vit_layers: "2,5,8,11"   # keep quoted: comma-separated string
+vit_layers: "2,5,8,11"   # SAM ViT-B has 12 blocks (global-attn block indices)
 decoder_up_factor: 4
 vit_chunk_slices: 8
 vit_amp: true

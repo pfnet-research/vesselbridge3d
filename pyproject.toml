@@ -13,7 +13,22 @@ dependencies = [
     "imageio==2.37.2",
     "tqdm==4.67.1",
     "pyyaml>=6.0.3",
+    # MedSAM (SamModel) and MedGemma (SigLIP vision tower) load through the
+    # existing transformers dependency. huggingface_hub is listed explicitly for
+    # gated-model authentication (MedGemma requires accepting its HF license).
+    "huggingface_hub>=0.34",
 ]
+
+[project.scripts]
+vb3d-train = "vesselbridge3d.train:main"
+vb3d-infer = "vesselbridge3d.inference:main"
+
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["vesselbridge3d*"]
 
 [tool.uv.sources]
 torch = { index = "pytorch-cu121" }

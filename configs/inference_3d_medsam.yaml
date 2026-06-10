@@ -1,0 +1,17 @@
+# Preset config for inference.py (MedSAM comparison model).
+# Must match the corresponding training run (configs/train_3d_medsam.yaml).
+# Run: uv run vb3d-infer --config configs/inference_3d_medsam.yaml \
+#        --test_list ... --checkpoint ... --out_dir ...
+
+model_type: medsam_unetr
+num_classes: 16
+img_size: "336"
+vit_layers: "2,5,8,11"
+decoder_up_factor: 4
+vit_chunk_slices: 8
+vit_amp: true
+
+# Per-run paths (usually passed on the CLI)
+# test_list: /path/to/test.json
+# checkpoint: /path/to/checkpoint.pt
+# out_dir: /path/to/output
