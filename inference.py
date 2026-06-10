@@ -1,5 +1,5 @@
 """
-python inference.py \
+uv run python inference.py \
   --test_list /path/to/test.json \
   --checkpoint /path/to/checkpoint.pt \
   --out_dir /path/to/output \

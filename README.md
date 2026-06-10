@@ -34,7 +34,7 @@ uv sync
 > - Python 3.12 is used (managed automatically by uv via `.python-version`).
 > - PyTorch is installed with CUDA 12.1 builds (`torch==2.5.1+cu121`). The CUDA index is configured in `pyproject.toml`.
 
-Prefix the commands below with `uv run` (e.g. `uv run python train.py ...`), or activate the environment first with `source .venv/bin/activate`.
+The commands below use `uv run` to execute scripts within the managed environment. Alternatively, activate the environment once with `source .venv/bin/activate` and run `python train.py ...` directly.
 
 ### 2. Prepare Data (JSON List Format)
 
@@ -61,7 +61,7 @@ Each entry must contain `"volume"` (image) and `"seg"` (label) paths.
 
 #### 3D Model 
 ```bash
-python train.py \
+uv run python train.py \
   --train_list /path/to/train.json \
   --val_list /path/to/val.json \
   --log_dir /path/to/log_dir \
@@ -89,7 +89,7 @@ Each chunk is processed independently, and results are stitched back to the orig
 Output segmentation masks are saved as NIfTI files in `--out_dir`, preserving the original affine and header.
 
 ```bash
-python inference.py \
+uv run python inference.py \
   --test_list  /path/to/test.json \
   --checkpoint /path/to/checkpoint.pt \
   --out_dir    /path/to/output \

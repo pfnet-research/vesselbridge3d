@@ -20,7 +20,7 @@ Architecture:
     -> HRHead2D (DW 3x3 + GroupNorm + SiLU + SE + 1x1, per-slice chunked)
 
 Example:
-    python train.py \
+    uv run python train.py \
       --train_list /path/to/train.json \
       --val_list /path/to/val.json \
       --num_classes 16 \
