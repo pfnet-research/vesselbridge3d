@@ -36,6 +36,15 @@ uv sync
 
 The commands below use `uv run` to execute the package modules within the managed environment. Alternatively, activate the environment once with `source .venv/bin/activate` and run `python -m vesselbridge3d.train ...` directly. Run all commands from the repository root.
 
+After `uv sync` (or `uv pip install -e .`), two console scripts are also available as shortcuts for the module invocations:
+
+```bash
+vesselbridge3d-train ...   # equivalent to: python -m vesselbridge3d.train ...
+vesselbridge3d-infer ...   # equivalent to: python -m vesselbridge3d.inference ...
+```
+
+The architecture is selected with `--model_type` (default `dinov3_unetr`). New models are added under `vesselbridge3d/models/` and registered in the model registry; the same training and inference commands then work for any registered `--model_type`.
+
 ### 2. Prepare Data (JSON List Format)
 
 Training and validation data are specified via JSON files.  
@@ -122,6 +131,7 @@ uv run python -m vesselbridge3d.inference \
 
 | Argument | Default | Description |
 |---|---|---|
+| `--model_type` | `dinov3_unetr` | Model architecture key (see `vesselbridge3d.models` registry) |
 | `--train_list` | *(required)* | Path to the training JSON list |
 | `--val_list` | same as `train_list` | Path to the validation JSON list |
 | `--num_classes` | *(required)* | Number of classes including background |
