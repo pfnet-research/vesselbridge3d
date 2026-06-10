@@ -39,13 +39,15 @@ def build_model(model_type: str, **kwargs) -> nn.Module:
 
 
 # Import model modules so their @register_model builders run on package import.
+from .seg3d_base import SegModel3DBase  # noqa: E402,F401
 from .dinov3_unetr import SegModel3D_UNETRLite  # noqa: E402,F401
-# Future: from .medsam_unetr import ...
-#         from .medgemma_unetr import ...
+from . import medsam_unetr  # noqa: E402,F401  (registers "medsam_unetr")
+from . import medgemma_unetr  # noqa: E402,F401  (registers "medgemma_unetr")
 
 __all__ = [
     "MODEL_REGISTRY",
     "register_model",
     "build_model",
+    "SegModel3DBase",
     "SegModel3D_UNETRLite",
 ]
