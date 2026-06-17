@@ -1,0 +1,18 @@
+# Preset config for inference.py (MedGemma comparison model).
+# Must match the corresponding training run (configs/train_3d_medgemma.yaml).
+# MedGemma is gated on the HF Hub: accept the license and export HF_TOKEN first.
+# Run: uv run vb3d-infer --config configs/inference_3d_medgemma.yaml \
+#        --test_list ... --checkpoint ... --out_dir ...
+
+model_type: medgemma_unetr
+num_classes: 16
+img_size: "336"
+vit_layers: "6,13,20,26"
+decoder_up_factor: 4
+vit_chunk_slices: 4
+vit_amp: true
+
+# Per-run paths (usually passed on the CLI)
+# test_list: /path/to/test.json
+# checkpoint: /path/to/checkpoint.pt
+# out_dir: /path/to/output
