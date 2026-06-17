@@ -34,7 +34,19 @@ uv sync
 > - Python 3.12 is used (managed automatically by uv via `.python-version`).
 > - PyTorch is installed with CUDA 12.1 builds (`torch==2.5.1+cu121`). The CUDA index is configured in `pyproject.toml`.
 
-The commands below use `uv run` to execute the package modules within the managed environment. Alternatively, activate the environment once with `source .venv/bin/activate` and run `python -m vesselbridge3d.train ...` directly. Run all commands from the repository root.
+After `uv sync` (or `uv pip install -e .`), two console scripts are installed and used as the primary commands throughout this README:
+
+```bash
+vb3d-train ...   # equivalent to: python -m vesselbridge3d.train ...
+vb3d-infer ...   # equivalent to: python -m vesselbridge3d.inference ...
+```
+
+The commands below run these scripts via `uv run` within the managed environment. Alternatively, activate the environment once with `source .venv/bin/activate` and then call `vb3d-train ...` / `vb3d-infer ...` directly (or `python -m vesselbridge3d.train ...`). Run all commands from the repository root.
+
+The architecture is selected with `--model_type` (default `dinov3_unetr`). New models are added under `vesselbridge3d/models/` and registered in the model registry; the same training and inference commands then work for any registered `--model_type`.
+
+> **Layout**
+> The package root contains only the two runnable entry points, `train.py` and `inference.py`. All library code lives in subpackages: `models/` (architectures + registry), `data/` (datasets, preprocessing), `engine/` (training loop, inference, losses), and `common/` (config, constants, utilities).
 
 ### 2. Prepare Data (JSON List Format)
 
@@ -61,7 +73,7 @@ Each entry must contain `"volume"` (image) and `"seg"` (label) paths.
 
 #### 3D Model 
 ```bash
-uv run python -m vesselbridge3d.train \
+uv run vb3d-train \
   --train_list /path/to/train.json \
   --val_list /path/to/val.json \
   --log_dir /path/to/log_dir \
@@ -85,7 +97,7 @@ uv run python -m vesselbridge3d.train \
 
 Alternatively, load preset values from a YAML config (CLI args override the config):
 ```bash
-uv run python -m vesselbridge3d.train \
+uv run vb3d-train \
   --config configs/train_3d_default.yaml \
   --train_list /path/to/train.json \
   --save_dir /path/to/save_dir
@@ -97,7 +109,7 @@ Each chunk is processed independently, and results are stitched back to the orig
 Output segmentation masks are saved as NIfTI files in `--out_dir`, preserving the original affine and header.
 
 ```bash
-uv run python -m vesselbridge3d.inference \
+uv run vb3d-infer \
   --test_list  /path/to/test.json \
   --checkpoint /path/to/checkpoint.pt \
   --out_dir    /path/to/output \
@@ -107,7 +119,7 @@ uv run python -m vesselbridge3d.inference \
 
 Or with a preset config:
 ```bash
-uv run python -m vesselbridge3d.inference \
+uv run vb3d-infer \
   --config configs/inference_3d_default.yaml \
   --test_list /path/to/test.json \
   --checkpoint /path/to/checkpoint.pt \
@@ -122,6 +134,7 @@ uv run python -m vesselbridge3d.inference \
 
 | Argument | Default | Description |
 |---|---|---|
+| `--model_type` | `dinov3_unetr` | Model architecture key (see `vesselbridge3d.models` registry) |
 | `--train_list` | *(required)* | Path to the training JSON list |
 | `--val_list` | same as `train_list` | Path to the validation JSON list |
 | `--num_classes` | *(required)* | Number of classes including background |

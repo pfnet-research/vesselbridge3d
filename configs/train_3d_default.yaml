@@ -3,6 +3,7 @@
 # Run: uv run python -m vesselbridge3d.train --config configs/train_3d_default.yaml --train_list ... --save_dir ...
 # Precedence: explicit CLI args > this config > argparse defaults.
 
+model_type: dinov3_unetr  # model architecture key (see vesselbridge3d.models registry)
 num_classes: 16
 epochs: 1000
 batch_size: 16

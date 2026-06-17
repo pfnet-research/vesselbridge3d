@@ -15,6 +15,17 @@ dependencies = [
     "pyyaml>=6.0.3",
 ]
 
+[project.scripts]
+vb3d-train = "vesselbridge3d.train:main"
+vb3d-infer = "vesselbridge3d.inference:main"
+
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["vesselbridge3d*"]
+
 [tool.uv.sources]
 torch = { index = "pytorch-cu121" }
 torchvision = { index = "pytorch-cu121" }
